@@ -6,40 +6,37 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
+
+DROP DATABASE IF EXISTS tournament;
+
+
+CREATE DATABASE tournament;
+
+
 \c tournament;
 
-DELETE FROM Players;
-DELETE FROM Matches;
 
-ALTER SEQUENCE Players_id_seq RESTART;
-ALTER SEQUENCE Matches_id_seq RESTART;
+CREATE TABLE Players (
+	id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL
+);
 
-INSERT INTO Players (Name)
-	VALUES ('Vadym'),
-		   ('Maxim'),
-		   ('Vitamino'),
-		   ('Rost');
 
-INSERT INTO Matches (round, player1, player2, winner)
-	VALUES (1, 1, 2, 1),
-		   (1, 3, 4, 3),
-		   (2, 1, 3, 1),
-		   (2, 2, 4, 2);
-		   
-SELECT * FROM Players;
-SELECT * FROM Matches;
+CREATE TABLE Matches (
+	id SERIAL PRIMARY KEY,
+	player1 INT NOT NULL REFERENCES Players (id),
+	player2 INT NOT NULL REFERENCES Players (id),
+	winner INT NOT NULL
+);
 
 
 CREATE VIEW wins_count AS
-	(SELECT Name, count(Matches.id) as wins
+	(SELECT Players.id, Name AS name, count(Matches.id) AS wins, CASE WHEN EXISTS (SELECT 1 FROM Matches) THEN 
+																		(SELECT count(*) FROM Matches WHERE player1 = Players.id OR player2 = Players.id)
+																	  ELSE 0 
+																 END AS matches
 		FROM Players LEFT JOIN Matches
-		ON (player1 = winner
-			AND player1 = Players.id)
-			OR (player2 = winner
-			AND player2 = Players.id)
-		GROUP BY Name
+		ON Players.id = winner
+		GROUP BY Players.id, Name
 		ORDER BY wins DESC);
 
-SELECT * FROM wins_count;
-	
-	
