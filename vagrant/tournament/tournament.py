@@ -18,7 +18,7 @@ def queryToDatabase(query):
     c = conn.cursor()
     
     c.execute(query)
-    query_result = c
+    query_result = c.fetchall()
     
     conn.commit() 
     conn.close()
@@ -38,7 +38,7 @@ def deletePlayers():
 def countPlayers():
     """Returns the number of players currently registered."""    
     res = queryToDatabase("SELECT count(*) FROM Players;")
-    count = res.fetchall()[0][0]
+    count = res[0][0]
     return int(count)
 
 
@@ -68,7 +68,7 @@ def playerStandings():
         matches: the number of matches the player has played
     """
     res = queryToDatabase("SELECT * FROM wins_count;")
-    standings = [(row[0], row[1], row[2], row[3]) for row in res.fetchall()]   
+    standings = [(row[0], row[1], row[2], row[3]) for row in res]   
     return standings
 
 
@@ -99,7 +99,7 @@ def swissPairings():
         name2: the second player's name
     """
     res = queryToDatabase("SELECT * FROM wins_count;")
-    standings = [(row[0], row[1], row[2], row[3]) for row in res.fetchall()]
+    standings = [(row[0], row[1], row[2], row[3]) for row in res]
     
     pairings = []
     for i in range(0, len(standings), 2):
