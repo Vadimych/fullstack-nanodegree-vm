@@ -9,7 +9,7 @@ import bleach
 
 def connect(database_name="tournament"):
     """Connect to the PostgreSQL database.  Returns a database connection and a cursor."""
-     try:
+    try:
         db = psycopg2.connect("dbname={}".format(database_name))
         cursor = db.cursor()
         return db, cursor
