@@ -12,9 +12,6 @@ bug were fixed.
 ### "Tournament" subfolder
 
 This subfolder contains code for final project of "Tournament Database". 
-There are three files: 
-  - tournament.sql -- table definitions for the tournament project;
-  - tournament.py -- implementation of a Swiss-system tournament;
-  - tournament_test.py -- test cases for tournament.py.
 
-To test the operability of the project run "tournament_test.py" file.
+In prder to test the operability of the project follow the instructions in this 
+[file](vagrant/tournament/README_Tournament.md).
