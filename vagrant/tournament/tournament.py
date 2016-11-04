@@ -12,31 +12,33 @@ def connect():
     return psycopg2.connect("dbname=tournament")
 
 
-def deleteMatches():
-    """Remove all the match records from the database."""
+def queryToDatabase(query):
+    """Execute query to the Database"""
     conn = connect()
     c = conn.cursor()
-    c.execute("DELETE FROM Matches;")
+    
+    c.execute(query)
+    query_result = c
+    
     conn.commit() 
     conn.close()
+    return query_result
+
+
+def deleteMatches():
+    """Remove all the match records from the database."""
+    queryToDatabase("DELETE FROM Matches;")
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE FROM Players;")
-    conn.commit() 
-    conn.close()
+    queryToDatabase("DELETE FROM Players;")
 
 
 def countPlayers():
-    """Returns the number of players currently registered."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT count(*) FROM Players;")
-    count = c.fetchall()[0][0]
-    conn.close()
+    """Returns the number of players currently registered."""    
+    res = queryToDatabase("SELECT count(*) FROM Players;")
+    count = res.fetchall()[0][0]
     return int(count)
 
 
@@ -49,11 +51,7 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT INTO Players (Name) VALUES (%s);", (bleach.clean(name), ))
-    conn.commit() 
-    conn.close()
+    queryToDatabase("INSERT INTO Players (Name) VALUES (%s);", (bleach.clean(name), ))
 
 
 def playerStandings():
@@ -69,13 +67,8 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT * FROM wins_count;")
-    
-    standings = [(row[0], row[1], row[2], row[3]) for row in c.fetchall()]
-    
-    conn.close()
+    res = queryToDatabase("SELECT * FROM wins_count;")
+    standings = [(row[0], row[1], row[2], row[3]) for row in res.fetchall()]   
     return standings
 
 
@@ -86,13 +79,10 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT INTO Matches (player1, player2, winner) VALUES (%s, %s, %s);", (bleach.clean(winner), bleach.clean(loser), bleach.clean(winner), ))
-    conn.commit() 
-    conn.close()
- 
- 
+    queryToDatabase("INSERT INTO Matches (player1, player2, winner) VALUES (%s, %s, %s);", 
+                    (bleach.clean(winner), bleach.clean(loser), bleach.clean(winner), ))
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
   
@@ -108,15 +98,11 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT * FROM wins_count;")
-    
-    standings = [(row[0], row[1], row[2], row[3]) for row in c.fetchall()]
+    res = queryToDatabase("SELECT * FROM wins_count;")
+    standings = [(row[0], row[1], row[2], row[3]) for row in res.fetchall()]
     
     pairings = []
     for i in range(0, len(standings), 2):
         pairings.append((standings[i][0], standings[i][1], standings[i + 1][0], standings[i + 1][1]))
     
-    conn.close()
     return pairings
