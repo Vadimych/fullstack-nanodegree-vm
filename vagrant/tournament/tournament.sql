@@ -32,9 +32,11 @@ CREATE TABLE Matches (
 
 CREATE VIEW wins_count AS
 	(SELECT Players.id, Name AS name, count(Matches.id) AS wins, CASE WHEN EXISTS (SELECT 1 FROM Matches) THEN 
-																		(SELECT count(*) FROM Matches WHERE player1 = Players.id OR player2 = Players.id)
-																	  ELSE 0 
-																 END AS matches
+										(SELECT count(*) FROM Matches 
+									 		WHERE player1 = Players.id 
+										 	   OR player2 = Players.id)
+									        ELSE 0 
+								     END AS matches
 		FROM Players LEFT JOIN Matches
 		ON Players.id = winner
 		GROUP BY Players.id, Name
