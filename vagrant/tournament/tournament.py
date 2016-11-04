@@ -12,17 +12,25 @@ def connect():
     return psycopg2.connect("dbname=tournament")
 
 
-def queryToDatabase(query):
+def queryToDatabase(*query):
     """Execute query to the Database"""
     conn = connect()
     c = conn.cursor()
-    
-    c.execute(query)
-    query_result = c.fetchall()
-    
-    conn.commit() 
-    conn.close()
-    return query_result
+
+    if len(query) > 1:
+        c.execute(query[0], query[1])
+    else:
+        c.execute(query[0])
+
+    try:
+        query_result = c.fetchall()
+        conn.commit() 
+        conn.close()
+        return query_result
+
+    except psycopg2.ProgrammingError:
+        conn.commit() 
+        conn.close()
 
 
 def deleteMatches():
