@@ -7,30 +7,34 @@ import psycopg2
 import bleach
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+def connect(database_name="tournament"):
+    """Connect to the PostgreSQL database.  Returns a database connection and a cursor."""
+     try:
+        db = psycopg2.connect("dbname={}".format(database_name))
+        cursor = db.cursor()
+        return db, cursor
+    except:
+        print("Connection error!")
 
 
 def queryToDatabase(*query):
     """Execute query to the Database"""
-    conn = connect()
-    c = conn.cursor()
+    db, cursor = connect()
 
     if len(query) > 1:
-        c.execute(query[0], query[1])
+        cursor.execute(query[0], query[1])
     else:
-        c.execute(query[0])
+        cursor.execute(query[0])
 
     try:
-        query_result = c.fetchall()
-        conn.commit() 
-        conn.close()
+        query_result = cursor.fetchall()
+        db.commit() 
+        db.close()
         return query_result
 
     except psycopg2.ProgrammingError:
-        conn.commit() 
-        conn.close()
+        db.commit() 
+        db.close()
 
 
 def deleteMatches():
